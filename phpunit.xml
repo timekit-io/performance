@@ -13,6 +13,9 @@
          beStrictAboutOutputDuringTests="true"
          verbose="true"
 >
+    <logging>
+        <log type="coverage-clover" target="coveralls.xml"/>
+    </logging>
     <testsuites>
         <testsuite name="Test suite">
             <directory>./tests</directory>
