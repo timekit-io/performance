@@ -6,5 +6,7 @@ machine:
 dependencies:
   cache_directories:
       - "~/performance/vendor"
+  pre:
+      - rm /opt/circleci/php/$(phpenv global)/etc/conf.d/xdebug.ini
   override:
         - composer install --prefer-dist --no-interaction --no-progress
