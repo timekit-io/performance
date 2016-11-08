@@ -5,4 +5,4 @@ machine:
       UTC
 dependencies:
   cache_directories:
-      - "~/api/vendor"
+      - "~/performance/vendor"
