@@ -14,11 +14,11 @@ class PerformanceServiceProvider extends ServiceProvider
     {
         $dispatcher = $this->app->make(Dispatcher::class);
 
-        $this->app->singleton(QueryContainer::class, function($app) {
+        $this->app->singleton(QueryContainer::class, function ($app) {
             return new QueryContainer($app->make(Request::class), $app->make(Filesystem::class));
         });
 
-        $dispatcher->listen(QueryExecuted::class, function(QueryExecuted $event) {
+        $dispatcher->listen(QueryExecuted::class, function (QueryExecuted $event) {
             $container = $this->app->make(QueryContainer::class);
             $container->addByEvent($event);
         });
