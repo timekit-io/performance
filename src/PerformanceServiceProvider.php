@@ -3,14 +3,20 @@
 namespace Timekit\Performance;
 
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 
 class PerformanceServiceProvider extends ServiceProvider
 {
-    public function register(Dispatcher $dispatcher)
+    public function boot()
     {
-        $this->app->singleton(QueryContainer::class, $this->app->make(QueryContainer::class));
+        $dispatcher = $this->app->make(Dispatcher::class);
+
+        $this->app->singleton(QueryContainer::class, function($app) {
+            return new QueryContainer($app->make(Request::class), $app->make(Filesystem::class));
+        });
 
         $dispatcher->listen(QueryExecuted::class, function(QueryExecuted $event) {
             $container = $this->app->make(QueryContainer::class);
