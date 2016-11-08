@@ -20,6 +20,10 @@ Via Composer
 $ composer require :vendor/:package_name
 ```
 
+1. Include `Timekit\Performance\PerformanceServiceProvider` in `config/app.php`
+2. Include `DatabasePerformance` command in `Console/Kernel.php`
+3. Include `PerformanceTracking` middleware in `Http/Kernel.php`
+
 ## Usage
 
 ``` php
