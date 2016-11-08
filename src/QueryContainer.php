@@ -41,7 +41,7 @@ class QueryContainer
     public function __construct(Request $request = null, Filesystem $filesystem)
     {
         $this->resetCounters();
-        $this->slowQueryThreshold = 10;
+        $this->slowQueryThreshold = config('performance.slow_query_threshold', 100);
         $this->timestamp = Carbon::now();
         $this->url = $request->getPathInfo();
         $this->method = $request->getMethod();
