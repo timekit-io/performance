@@ -154,6 +154,28 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
      * @group new
      *
      */
+    public function can_count_misc_queries()
+    {
+        // Given
+        $request = $this->createRequest('v2/test', 'get');
+        $container = new QueryContainer($request, $this->flysystem);
+
+        // When
+        $container->add("DROP database;", 10);
+
+        // Then
+        $this->assertEquals(0, $container->getSelectCount());
+        $this->assertEquals(0, $container->getInsertCount());
+        $this->assertEquals(0, $container->getUpdateCount());
+        $this->assertEquals(1, $container->getMiscCount());
+        $this->assertEquals(1, $container->allCount());
+    }
+
+    /**
+     * @test
+     * @group new
+     *
+     */
     public function can_get_url()
     {
         // Given
@@ -294,5 +316,27 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
         $queries = $container->allSlowQueries();
         $this->assertEquals(4, $container->allCount());
         $this->assertEquals('[11 ms]: SELECT * FROM users where id = 1', $queries[0]);
+    }
+
+    /**
+     * @test
+     * @group new
+     *
+     */
+    public function can_count_slow_queries()
+    {
+        // Given
+        $request = $this->createRequest('v2/test', 'get');
+        $container = new QueryContainer($request, $this->flysystem);
+
+        // When
+        $container->add('SELECT * FROM users where id = 1', 14);
+        $container->add('SELECT * FROM users where id = 2', 12);
+        $container->add('SELECT * FROM users where id = 3', 2);
+        $container->add('SELECT * FROM users where id = 4', 13);
+
+        // Then
+        $queries = $container->allSlowQueries();
+        $this->assertEquals(3, $container->slowQueryCount());
     }
 }
