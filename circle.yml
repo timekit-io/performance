@@ -6,10 +6,9 @@ machine:
 dependencies:
   cache_directories:
       - "~/performance/vendor"
-  pre:
-      - sed -i 's/^;//' /opt/circleci/php/$(phpenv global)/etc/conf.d/xdebug.ini
   override:
       - composer install --prefer-dist --no-interaction --no-progress
+      - sed -i 's/^;//' /opt/circleci/php/$(phpenv global)/etc/conf.d/xdebug.ini
 
 test:
   post:
