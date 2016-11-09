@@ -52,7 +52,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $container->add('SELECT * FROM users', 10);
@@ -70,7 +70,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $container->add('SELECT * FROM users', 10);
@@ -92,7 +92,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $container->add("INSERT INTO users (name, email) VALUES ('vk', 'vk@timekit.io')", 10);
@@ -114,7 +114,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $container->add("UPDATE users SET name = 'visti'", 10);
@@ -136,7 +136,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $container->add("DELETE from users WHERE id = 1", 10);
@@ -158,7 +158,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $container->add("DROP database;", 10);
@@ -180,7 +180,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test/random/url', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $url = $container->getUrl();
@@ -198,7 +198,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $threshold = $container->getSlowQueryThreshold();
@@ -216,7 +216,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         $queryExecuted = $this->createQueryExecutedEvent("select * from users where id = ?", ['1'], 0.75);
 
@@ -232,15 +232,15 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-    * @test
-    * @group new
-    *
-    */
+     * @test
+     * @group new
+     *
+     */
     public function can_get_the_slowest_query_time()
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $container->add('SELECT * FROM users', 10);
@@ -262,7 +262,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $container->add('SELECT * FROM users', 10);
@@ -276,15 +276,15 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-    * @test
-    * @group new
-    *
-    */
+     * @test
+     * @group new
+     *
+     */
     public function can_reset_count()
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $container->add('SELECT * FROM users', 10);
@@ -304,7 +304,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $container->add('SELECT * FROM users where id = 1', 11);
@@ -327,7 +327,7 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
     {
         // Given
         $request = $this->createRequest('v2/test', 'get');
-        $container = new QueryContainer($request, $this->flysystem);
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
 
         // When
         $container->add('SELECT * FROM users where id = 1', 14);
@@ -336,7 +336,61 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
         $container->add('SELECT * FROM users where id = 4', 13);
 
         // Then
-        $queries = $container->allSlowQueries();
         $this->assertEquals(3, $container->slowQueryCount());
+    }
+
+    /**
+     * @test
+     * @group new
+     *
+     */
+    public function can_save_query_container_to_file_system()
+    {
+        $this->markTestIncomplete('Not sure on how to test the filesystem');
+        $request = $this->createRequest('v2/test', 'get');
+
+        $filesystem = new \Illuminate\Filesystem\Filesystem();
+        $container = new QueryContainer($request, $filesystem, 'tmp/');
+
+        // When
+        $container->add('SELECT * FROM users where id = 1', 14);
+
+        // Then
+        $this->assertTrue($container->save());
+    }
+
+    /**
+     * @test
+     * @group new
+     *
+     */
+    public function can_get_file_name()
+    {
+        // Given
+        $request = $this->createRequest('v2/test', 'get');
+
+        // When
+        $container = new QueryContainer($request, $this->flysystem, 'tmp/');
+
+        // Then
+        $this->assertTrue(is_string($container->getFileName()));
+    }
+
+    /**
+     * @test
+     * @group new
+     * @expectedException RuntimeException
+     * @expectedExceptionMessage Storage path must end with a /
+     */
+    public function storage_path_must_end_with_backslash()
+    {
+        // Given
+        $request = $this->createRequest('v2/test', 'get');
+
+        // When
+        new QueryContainer($request, $this->flysystem, 'tmp');
+
+        // Then
+        // An exception is throw
     }
 }

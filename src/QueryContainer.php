@@ -37,8 +37,12 @@ class QueryContainer
      * @var Filesystem
      */
     private $filesystem;
+    /**
+     * @var string
+     */
+    private $storagePath;
 
-    public function __construct(Request $request = null, Filesystem $filesystem)
+    public function __construct(Request $request = null, Filesystem $filesystem, string $storagePath)
     {
         $this->resetCounters();
         $this->slowQueryThreshold = 10;
@@ -46,6 +50,12 @@ class QueryContainer
         $this->url = $request->getPathInfo();
         $this->method = $request->getMethod();
         $this->filesystem = $filesystem;
+        $this->request = $request;
+        if (!Str::endsWith($storagePath, '/')){
+            throw new \RuntimeException('Storage path must end with a /');
+        }
+        $this->storagePath = $storagePath;
+        $this->fileName = Str::random();
     }
 
     /**
@@ -54,6 +64,14 @@ class QueryContainer
     public function getUrl(): string
     {
         return $this->url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileName(): string
+    {
+        return $this->fileName;
     }
 
     /**
@@ -74,9 +92,8 @@ class QueryContainer
 
     public function save()
     {
-        // check if performance folder exists
-        $fullPath = storage_path('performance/' . Str::random());
-        $this->filesystem->put(
+        $fullPath = $this->storagePath . $this->fileName;
+        return $this->filesystem->put(
             $fullPath,
             serialize($this)
         );

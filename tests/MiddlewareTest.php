@@ -27,4 +27,24 @@ class MiddlewareTest extends PHPUnit_Framework_TestCase
         $mock->shouldHaveReceived('save')->once();
         $this->assertTrue(true);
     }
+
+    /**
+     * @test
+     * @group new
+     *
+     */
+    public function the_handle_method_does_not_break_anything()
+    {
+        // Given
+        $mock = Mockery::mock(QueryContainer::class);
+        $middleware = new PerformanceTracking($mock);
+
+        // When
+        $output = $middleware->handle(null, function($request){
+            return true;
+        });
+
+        // Then
+        $this->assertTrue($output);
+    }
 }
