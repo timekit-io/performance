@@ -11,4 +11,4 @@ dependencies:
   override:
       - composer install --prefer-dist --no-interaction --no-progress
   post:
-      - coveralls
+      - ./vendor/bin/coveralls
