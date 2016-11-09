@@ -1,2 +1,3 @@
 repo_token: 5JAYOar8bQCxZC96jcQC1cIeZ9AhUFJiV
 coverage_clover: coveralls.xml
+json_path: coveralls.json
