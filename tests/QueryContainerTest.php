@@ -252,4 +252,47 @@ class QueryContainerTest extends PHPUnit_Framework_TestCase
         // Then
         $this->assertEquals(10 + 10001 + 1000 + 10000 + 100, $container->getTotalSQLTime());
     }
+
+    /**
+    * @test
+    * @group new
+    *
+    */
+    public function can_reset_count()
+    {
+        // Given
+        $request = $this->createRequest('v2/test', 'get');
+        $container = new QueryContainer($request, $this->flysystem);
+
+        // When
+        $container->add('SELECT * FROM users', 10);
+        $this->assertEquals(1, $container->allCount());
+        $container->resetCounters();
+
+        // Then
+        $this->assertEquals(0, $container->allCount());
+    }
+
+    /**
+     * @test
+     * @group new
+     *
+     */
+    public function can_get_slow_queries()
+    {
+        // Given
+        $request = $this->createRequest('v2/test', 'get');
+        $container = new QueryContainer($request, $this->flysystem);
+
+        // When
+        $container->add('SELECT * FROM users where id = 1', 11);
+        $container->add('SELECT * FROM users where id = 2', 1);
+        $container->add('SELECT * FROM users where id = 3', 2);
+        $container->add('SELECT * FROM users where id = 4', 3);
+
+        // Then
+        $queries = $container->allSlowQueries();
+        $this->assertEquals(4, $container->allCount());
+        $this->assertEquals('[11 ms]: SELECT * FROM users where id = 1', $queries[0]);
+    }
 }

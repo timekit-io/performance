@@ -201,7 +201,6 @@ class QueryContainer
         return $this->queries->count();
     }
 
-
     public function slowQueryCount()
     {
         return $this->getSlowQueries()->count();
