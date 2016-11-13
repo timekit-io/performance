@@ -12,6 +12,13 @@ class PerformanceServiceProvider extends ServiceProvider
 {
     public function boot()
     {
+        $this->publishes([
+            __DIR__ . '/ressources/performance.php' => config_path('performance.php'),
+        ]);
+    }
+
+    public function register()
+    {
         $dispatcher = $this->app->make(Dispatcher::class);
 
         $this->app->singleton(QueryContainer::class, function ($app) {
