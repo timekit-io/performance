@@ -15,7 +15,7 @@ class PerformanceServiceProvider extends ServiceProvider
         $dispatcher = $this->app->make(Dispatcher::class);
 
         $this->app->singleton(QueryContainer::class, function ($app) {
-            return new QueryContainer($app->make(Request::class), $app->make(Filesystem::class));
+            return new QueryContainer($app->make(Request::class), $app->make(Filesystem::class), storage_path('performance/'));
         });
 
         $dispatcher->listen(QueryExecuted::class, function (QueryExecuted $event) {
