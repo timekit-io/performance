@@ -50,7 +50,6 @@ class QueryContainer
         $this->url = $request->getPathInfo();
         $this->method = $request->getMethod();
         $this->filesystem = $filesystem;
-        $this->request = $request;
         if (!Str::endsWith($storagePath, '/')){
             throw new \RuntimeException('Storage path must end with a /');
         }
