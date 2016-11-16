@@ -78,11 +78,18 @@ class DatabasePerformance extends Command
         $table = new Table($this->output);
         $table->setHeaders(['id', 'timestamp', 'url', 'select queries', 'insert queries', 'delete queries', 'update queries', 'total time']);
         $files = $this->filesystem->files($this->folder);
+        $requests = collect();
         foreach ($files as $file) {
             $shortName = last(explode('/', $file));
             $obj = $this->loadRequest($shortName);
-            $table->addRow([$shortName, $obj->getTimestamp(), $obj->getUrl(), $obj->getSelectCount(), $obj->getInsertCount(), $obj->getDeleteCount(), $obj->getUpdateCount(), $obj->getTotalSQLTime()]);
+            $requests[$shortName] = $obj;
         }
+
+        $requests->sortByDesc(function(QueryContainer $container){
+            return $container->getTimestamp();
+        })->each(function(QueryContainer $obj, $key) use ($table){
+            $table->addRow([$key, $obj->getTimestamp(), $obj->getUrl(), $obj->getSelectCount(), $obj->getInsertCount(), $obj->getDeleteCount(), $obj->getUpdateCount(), $obj->getTotalSQLTime()]);
+        });
 
         $table->render();
     }
