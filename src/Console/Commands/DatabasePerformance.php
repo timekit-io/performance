@@ -109,8 +109,8 @@ class DatabasePerformance extends Command
             $this->upOrDown($a->getTotalSQLTime(), $b->getTotalSQLTime()),
         ]);
 
-        $aQueries = $a->sortBy('query', 'query');
-        $bQueries = $b->sortBy('query', 'query');
+        $aQueries = $a->sortBy('query', 'count');
+        $bQueries = $b->sortBy('query', 'count');
 
         $table->render();
 
