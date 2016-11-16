@@ -1,17 +1,17 @@
 {
     "name": "timekit-io/performance",
     "type": "library",
-    "description": ":package_description",
+    "description": "Laravel database performance & profiling tool",
     "keywords": [
-        ":vendor",
-        ":package_name"
+        "laravel",
+        "database"
     ],
     "homepage": "https://github.com/timekit-io/performance",
     "license": "MIT",
     "authors": [
         {
             "name": "Visti Kløft",
-            "email": "vk@timekit.io",
+            "email": "hr.kloft@gmail.com",
             "homepage": "https://timekit.io",
             "role": "Developer"
         },
