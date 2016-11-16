@@ -62,6 +62,10 @@ class DatabasePerformance extends Command
             return;
         }
 
+        if ($compareTo == 'latest'){
+            $compareTo = $this->getSortedRequests($this->loadRequests())->first()->getFileName();
+        }
+
         if ($name !== null && $compareTo !== null) {
             $this->info(sprintf('compare: %s and %s', $name, $compareTo));
             $this->compare($name, $compareTo);
@@ -77,17 +81,9 @@ class DatabasePerformance extends Command
     {
         $table = new Table($this->output);
         $table->setHeaders(['id', 'timestamp', 'url', 'select queries', 'insert queries', 'delete queries', 'update queries', 'total time']);
-        $files = $this->filesystem->files($this->folder);
-        $requests = collect();
-        foreach ($files as $file) {
-            $shortName = last(explode('/', $file));
-            $obj = $this->loadRequest($shortName);
-            $requests[$shortName] = $obj;
-        }
+        $requests = $this->loadRequests();
 
-        $requests->sortByDesc(function(QueryContainer $container){
-            return $container->getTimestamp();
-        })->each(function(QueryContainer $obj, $key) use ($table){
+        $this->getSortedRequests($requests)->each(function(QueryContainer $obj, $key) use ($table){
             $table->addRow([$key, $obj->getTimestamp(), $obj->getUrl(), $obj->getSelectCount(), $obj->getInsertCount(), $obj->getDeleteCount(), $obj->getUpdateCount(), $obj->getTotalSQLTime()]);
         });
 
@@ -224,8 +220,34 @@ class DatabasePerformance extends Command
 
     }
 
-    private function prettyPrint(float $a)
+    private function prettyPrint($a)
     {
+        if ($a == null){
+            $a = 0;
+        }
         return round($a, 2);
+    }
+
+    private function getSortedRequests(Collection $requests)
+    {
+        return $requests->sortByDesc(function (QueryContainer $container) {
+            return $container->getTimestamp();
+        });
+    }
+
+    /**
+     * @return Collection
+     */
+    private function loadRequests():Collection
+    {
+        $files = $this->filesystem->files($this->folder);
+        $requests = collect();
+        foreach ($files as $file) {
+            $shortName = last(explode('/', $file));
+            $obj = $this->loadRequest($shortName);
+            $requests[$shortName] = $obj;
+        }
+
+        return $requests;
     }
 }
