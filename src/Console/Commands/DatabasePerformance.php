@@ -76,12 +76,12 @@ class DatabasePerformance extends Command
     private function listRequests()
     {
         $table = new Table($this->output);
-        $table->setHeaders(['id', 'timestamp', 'url', 'select queries', 'insert queries', 'delete queries', 'update queries']);
+        $table->setHeaders(['id', 'timestamp', 'url', 'select queries', 'insert queries', 'delete queries', 'update queries', 'total time']);
         $files = $this->filesystem->files($this->folder);
         foreach ($files as $file) {
             $shortName = last(explode('/', $file));
             $obj = $this->loadRequest($shortName);
-            $table->addRow([$shortName, $obj->getTimestamp(), $obj->getUrl(), $obj->getSelectCount(), $obj->getInsertCount(), $obj->getDeleteCount(), $obj->getUpdateCount()]);
+            $table->addRow([$shortName, $obj->getTimestamp(), $obj->getUrl(), $obj->getSelectCount(), $obj->getInsertCount(), $obj->getDeleteCount(), $obj->getUpdateCount(), $obj->getTotalSQLTime()]);
         }
 
         $table->render();
@@ -97,16 +97,56 @@ class DatabasePerformance extends Command
         }
 
         $table = new Table($this->output);
-        $table->setHeaders(['id', 'timestamp', 'select queries', 'insert queries', 'delete queries', 'update queries']);
-        $table->addRow([$name, $a->getTimestamp(), $a->getSelectCount(), $a->getInsertCount(), $a->getDeleteCount(), $a->getUpdateCount()]);
-        $table->addRow([$compareTo, $b->getTimestamp(), $b->getSelectCount(), $b->getInsertCount(), $b->getDeleteCount(), $b->getUpdateCount()]);
+        $table->setHeaders(['id', 'timestamp', 'select queries', 'insert queries', 'delete queries', 'update queries', 'total time']);
+        $table->addRow([$name, $a->getTimestamp(), $a->getSelectCount(), $a->getInsertCount(), $a->getDeleteCount(), $a->getUpdateCount(), $a->getTotalSQLTime()]);
+        $table->addRow([$compareTo, $b->getTimestamp(), $b->getSelectCount(), $b->getInsertCount(), $b->getDeleteCount(), $b->getUpdateCount(), $b->getTotalSQLTime()]);
         $table->addRow(['Diff: ',
             ($a->getTimestamp()->diffForHumans($b->getTimestamp())),
-            ($a->getSelectCount() - $b->getSelectCount()),
-            ($a->getInsertCount() - $b->getInsertCount()),
-            ($a->getDeleteCount() - $b->getDeleteCount()),
-            ($a->getUpdateCount() - $b->getUpdateCount())
+            $this->upOrDown($a->getSelectCount(), $b->getSelectCount()),
+            $this->upOrDown($a->getInsertCount(), $b->getInsertCount()),
+            $this->upOrDown($a->getDeleteCount(), $b->getDeleteCount()),
+            $this->upOrDown($a->getUpdateCount(), $b->getUpdateCount()),
+            $this->upOrDown($a->getTotalSQLTime(), $b->getTotalSQLTime()),
         ]);
+
+        $aQueries = $a->sortBy('query', 'query');
+        $bQueries = $b->sortBy('query', 'query');
+
+        $table->render();
+
+        $table = new Table($this->output);
+        $table->setHeaders(['query', 'count a', 'count b', 'diff', 'sum a', 'sum b', 'diff', 'avg a', 'avg b', 'diff']);
+
+        $aQueries->each(function ($item, $key) use ($bQueries, $table) {
+            $compareTo = $bQueries->get($key);
+            unset($bQueries[$key]);
+            $table->addRow(
+                [
+                    $item[0]['query'],
+                    $item['count'],
+                    $compareTo['count'],
+                    $this->upOrDown($item['count'], $compareTo['count']),
+                    $this->prettyPrint($item['sum']),
+                    $this->prettyPrint($compareTo['sum']),
+                    $this->upOrDown($item['sum'], $compareTo['sum']),
+                    $this->prettyPrint($item['avg']),
+                    $this->prettyPrint($compareTo['avg']),
+                    $this->upOrDown($item['avg'], $compareTo['avg']),
+                ]
+            );
+        });
+
+        $bQueries->each(function ($item, $key) use ($table) {
+            $table->addRow(
+                [
+                    $item[0]['query'],
+                    0,
+                    $item['count'],
+                    $this->upOrDown(0, $item['count']),
+
+                ]
+            );
+        });
 
         $table->render();
     }
@@ -148,9 +188,36 @@ class DatabasePerformance extends Command
         /** @var Collection $query */
         foreach ($queries as $query) {
             $q = $query[0];
-            $table->addRow([Str::limit($q['query'], 100), $query['count'], $query['sum'], $query['avg'], $query['percent']]);
+            $table->addRow([Str::limit($q['query'], 1000), $query['count'], $query['sum'], $query['avg'], $query['percent']]);
         }
         $table->addRow(['Total', $queries->sum('count'), $queries->sum('sum'), $queries->sum('percent')]);
         $table->render();
+    }
+
+    private function upOrDown($a, $b)
+    {
+        $style = null;
+        $indicator = '→';
+        if ($a > $b) {
+            $indicator = '↓';
+            $style = 'info';
+        }
+
+        if ($a < $b) {
+            $indicator = '↑';
+            $style = 'error';
+        }
+
+        if ($style === null) {
+            return sprintf("%s %s", $indicator, abs($a - $b));
+        }
+
+        return sprintf("<%s>%s %s</%s>", $style, $indicator, round(abs($a - $b), 2), $style);
+
+    }
+
+    private function prettyPrint(float $a)
+    {
+        return round($a, 2);
     }
 }
