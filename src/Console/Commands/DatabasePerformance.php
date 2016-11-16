@@ -97,15 +97,16 @@ class DatabasePerformance extends Command
         }
 
         $table = new Table($this->output);
-        $table->setHeaders(['id', 'timestamp', 'select queries', 'insert queries', 'delete queries', 'update queries', 'total time']);
-        $table->addRow([$name, $a->getTimestamp(), $a->getSelectCount(), $a->getInsertCount(), $a->getDeleteCount(), $a->getUpdateCount(), $a->getTotalSQLTime()]);
-        $table->addRow([$compareTo, $b->getTimestamp(), $b->getSelectCount(), $b->getInsertCount(), $b->getDeleteCount(), $b->getUpdateCount(), $b->getTotalSQLTime()]);
+        $table->setHeaders(['id', 'timestamp', 'select queries', 'insert queries', 'delete queries', 'update queries', 'total queries', 'total time']);
+        $table->addRow([$name, $a->getTimestamp(), $a->getSelectCount(), $a->getInsertCount(), $a->getDeleteCount(), $a->getUpdateCount(), $a->getTotalCount(), $a->getTotalSQLTime()]);
+        $table->addRow([$compareTo, $b->getTimestamp(), $b->getSelectCount(), $b->getInsertCount(), $b->getDeleteCount(), $b->getUpdateCount(), $b->getTotalCount(), $b->getTotalSQLTime()]);
         $table->addRow(['Diff: ',
-            ($a->getTimestamp()->diffForHumans($b->getTimestamp())),
+            ($b->getTimestamp()->diffForHumans($a->getTimestamp())),
             $this->upOrDown($a->getSelectCount(), $b->getSelectCount()),
             $this->upOrDown($a->getInsertCount(), $b->getInsertCount()),
             $this->upOrDown($a->getDeleteCount(), $b->getDeleteCount()),
             $this->upOrDown($a->getUpdateCount(), $b->getUpdateCount()),
+            $this->upOrDown($a->getTotalCount(), $b->getTotalCount()),
             $this->upOrDown($a->getTotalSQLTime(), $b->getTotalSQLTime()),
         ]);
 
